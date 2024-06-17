@@ -3,7 +3,7 @@ import pyaudio
 from speakerpy.lib_speak import Speaker
 from speakerpy.lib_sl_text import SeleroText
 
-model = Model("C:\\Users\\IBMStation\\Desktop\\project\\vosk-model-small-ru-0.22") # полный путь к модели
+model = Model("vosk-model-small-ru-0.22") # полный путь к модели
 rec = KaldiRecognizer(model, 16000)
 p = pyaudio.PyAudio()
 stream = p.open(
@@ -21,7 +21,7 @@ def responseAtText(text):
 	response = ''
  
 	if text == 'история':
-		response='история'
+		response='Высшее учебное заведение, один из федеральных университетов России, расположенный в Ростове-на-Дону и Таганроге Ростовской области. Является крупным научно-образовательным центром России'
   
 	if response != '':
 		speaker.speak(text=response, sample_rate=48000, put_accent=True, put_yo=False)
