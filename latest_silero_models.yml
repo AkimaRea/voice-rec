@@ -12,6 +12,7 @@ stt_models:
       jit_xlarge: "https://models.silero.ai/models/en/en_v6_xlarge.jit"
       onnx_xlarge: "https://models.silero.ai/models/en/en_v6_xlarge.onnx"
     v6:
+      meta:
         name: "en_v6"
         sample: "https://models.silero.ai/examples/en_sample.wav"
       labels: "https://models.silero.ai/models/en/en_v1_labels.json"
