@@ -27,6 +27,7 @@ while True:
 				break
 			
 		new_recognized = eval(rec.Result() if rec.AcceptWaveform(data) else rec.PartialResult()).get('partial')
+  
 		if new_recognized != old_recognized:
 				old_recognized = new_recognized
 		else: continue 
