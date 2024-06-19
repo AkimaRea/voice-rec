@@ -1,38 +1,43 @@
 from vosk import Model, KaldiRecognizer
-import pyaudio
+import sounddevice as sd
+import queue
+import sys
+import json
+from vosk import Model, KaldiRecognizer
 
 from response_module import calc_response
-from tts_module import speak_text
 
 model = Model("vosk-model-small-ru-0.22") # путь к модели
 rec = KaldiRecognizer(model, 16000)
-p = pyaudio.PyAudio()
 
-stream = p.open(
-		format=pyaudio.paInt16, 
-		channels=1, 
-		rate=16000, 
-		input=True, 
-		frames_per_buffer=16000
-  )
+# Создание очереди для передачи аудио данных
+audio_queue = queue.Queue()
 
-stream.start_stream()
+is_response_started = False
 
-old_recognized=''
+# Обработка аудио данных в реальном времени
+def audio_callback(indata, frames, time, status):
+    if status:
+        print(status, file=sys.stderr)
+    audio_queue.put(bytes(indata))
 
-""" speak_text(text="Привет, я голосовой помощник, разработан студентом Института Радиотехнических Систем и Управления кафедры САУ, готова ответить на интересующие вопросы") """
+# Инициализация потока записи
+def recognize_audio():
+    with sd.RawInputStream(samplerate=16000, blocksize=8000, dtype='int16',channels=1, callback=audio_callback):
+        print("Начало распознавания. Говорите в микрофон...")
+        while True:
+            data = audio_queue.get()
+            if rec.AcceptWaveform(data):
+                result = rec.Result()
+                text = json.loads(result)["text"]
+                print("Распознано: " + text)
+                calc_response(text)
+                    
 
-while True:
-		data = stream.read(16000)
-
-		if len(data) == 0:
-				break
-			
-		new_recognized = eval(rec.Result() if rec.AcceptWaveform(data) else rec.PartialResult()).get('partial')
-  
-		if new_recognized != old_recognized:
-				old_recognized = new_recognized
-		else: continue 
-  
-		print(old_recognized)
-		if old_recognized: calc_response(old_recognized)
+if __name__ == "__main__":
+    try:
+        recognize_audio()
+    except KeyboardInterrupt:
+        print("\nПрограмма остановлена пользователем")
+    except Exception as e:
+        print(str(e))
